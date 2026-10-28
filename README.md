@@ -4,6 +4,8 @@ A demonstration of bounded, ETag-driven polling with RTK Query.
 
 **Live demo:** https://sirlisko.github.io/etag-cacher-demo/
 
+**Blog post:** [Efficient API Polling in Redux RTK Query with EtagCacher](https://sirlisko.com/blog/efficient-api-polling-in-redux-rtk-query-with-etagcacher)
+
 ## Overview
 
 Some backends acknowledge a write before they have finished processing it. Instead of polling on a fixed interval forever, the EtagCacher polls only after a mutation and stops as soon as the server reports a change.
@@ -24,7 +26,7 @@ Note that this is not HTTP conditional caching: each poll downloads the full res
 3. Polling stops once the ETag has changed and nothing is processing, or after 5 retries
 4. New todos are created as `processing`; the mock server finishes them after 2 seconds, changing the data and the ETag together. Toggling a todo is synchronous, so polling stops on the first refetch
 
-The blog post's example treats `pending` todos as still in progress. The demo needs a separate `processing` status because its checkbox toggles todos between `pending` and `completed`.
+The [blog post](https://sirlisko.com/blog/efficient-api-polling-in-redux-rtk-query-with-etagcacher)'s example treats `pending` todos as still in progress. The demo needs a separate `processing` status because its checkbox toggles todos between `pending` and `completed`.
 
 ## Project Structure
 
@@ -52,7 +54,7 @@ pnpm run dev
 
 ## Testing
 
-The project includes a comprehensive test suite for the EtagCacher utility using Vitest.
+The EtagCacher utility is tested with Vitest.
 
 ```bash
 # Run all tests
