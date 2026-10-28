@@ -28,7 +28,7 @@ export const todosApi = createApi({
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
-          todosCacher.checkEtag(dispatch, "global", result.data.meta.etag);
+          todosCacher.checkEtag(dispatch, "global", result.data.meta.etag, result.data.data);
         } catch (e) {
           console.error(e);
         }
@@ -75,7 +75,8 @@ export const todosApi = createApi({
 // Initialize the EtagCacher with proper types
 export const todosCacher = new EtagCacher<typeof todosApi, Todo, 'Todos'>(
   'Todos',
-  todosApi
+  todosApi,
+  { isStatusPending: (todo) => todo.status === 'processing' }
 );
 
 export const {
