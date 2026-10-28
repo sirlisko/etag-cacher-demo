@@ -9,15 +9,15 @@ This project showcases the implementation of an efficient data polling mechanism
 ### Key Features
 
 - **ETag-based caching**: Uses HTTP ETags to determine if data has changed on the server
-- **Smart polling**: Only fetches new data when ETags change or when specific conditions are met
-- **Optimized network usage**: Reduces bandwidth by avoiding full data fetches when unnecessary
+- **Smart polling**: Only polls after a mutation, and stops as soon as the ETag changes
+- **Optimized network usage**: No requests while nothing is expected to change
 - **RTK Query integration**: Seamlessly works with Redux Toolkit Query for state management
 
 ## How it Works
 
 1. When you add or update a todo item, polling is automatically triggered
 2. The EtagCacher monitors server responses for ETag changes
-3. If all todos are completed or a new ETag is received, polling stops
+3. When a new ETag is received, or after 5 retries, polling stops
 4. There's a 2-second delay on adding a todo before the server updates the ETag after changes (simulating real-world conditions)
 
 ## Project Structure
@@ -42,7 +42,7 @@ pnpm run dev
 1. Add new todos using the form
 2. Mark todos as completed using the checkboxes
 3. Watch the polling indicator in the top right to see when polling is active
-4. Notice how polling stops when all todos are completed or after the server updates its ETag
+4. Notice how polling stops once the server updates its ETag
 
 ## Testing
 

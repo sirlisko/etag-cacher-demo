@@ -205,7 +205,7 @@ const TodoList: React.FC = () => {
           <li>The EtagCacher tracks server-side changes via ETags</li>
           <li>Polling automatically starts when you make changes</li>
           <li>
-            Polling stops when all todos are completed or a new ETag is received
+            Polling stops when a new ETag is received, or after 5 retries
           </li>
           <li>
             <strong>Note:</strong> There's a 2-second delay when adding a todo
