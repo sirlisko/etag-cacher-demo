@@ -24,7 +24,7 @@ Note that this is not HTTP conditional caching: each poll downloads the full res
 3. Polling stops once the ETag has changed and nothing is processing, or after 5 retries
 4. New todos are created as `processing`; the mock server finishes them after 2 seconds, changing the data and the ETag together. Toggling a todo is synchronous, so polling stops on the first refetch
 
-`processing` means the server is still handling a todo. It is separate from `pending`, which here just means the todo is not done yet, so only `processing` keeps polling alive.
+The blog post's example treats `pending` todos as still in progress. The demo needs a separate `processing` status because its checkbox toggles todos between `pending` and `completed`.
 
 ## Project Structure
 
