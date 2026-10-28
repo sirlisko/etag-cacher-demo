@@ -26,9 +26,9 @@ export const handlers = [
     );
   }),
 
-  rest.put('/api/todos/:id', (req, res, ctx) => {
+  rest.put('/api/todos/:id', async (req, res, ctx) => {
     const { id } = req.params;
-    const { status } = req.body as { status: string };
+    const { status } = await req.json();
 
     todos = todos.map(todo =>
       todo.id === id ? { ...todo, status } : todo
