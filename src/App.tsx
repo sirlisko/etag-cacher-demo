@@ -210,18 +210,21 @@ const TodoList: React.FC = () => {
       >
         <h3 style={{ marginTop: 0, color: "#0d47a1" }}>About EtagCacher</h3>
         <p>
-          This demo showcases efficient data polling with ETag caching. When you
-          add or update todos:
+          This demo shows bounded polling driven by ETags. When you add or
+          update todos:
         </p>
         <ul style={{ paddingLeft: "20px", lineHeight: "1.5" }}>
-          <li>The EtagCacher tracks server-side changes via ETags</li>
-          <li>Polling automatically starts when you make changes</li>
+          <li>Polling starts after each change</li>
           <li>
-            Polling stops when a new ETag is received, or after 5 retries
+            Each refetch compares the response ETag with the last one seen
           </li>
           <li>
-            <strong>Note:</strong> There's a 2-second delay when adding a todo
-            before the server updates the ETag after changes
+            Polling stops once the ETag has changed and no todo is processing,
+            or after 5 retries
+          </li>
+          <li>
+            <strong>Note:</strong> new todos are processed on the server for 2
+            seconds before their data and ETag change
           </li>
         </ul>
         <p style={{ marginBottom: 0 }}>
@@ -250,8 +253,7 @@ function App() {
           EtagCacher Demo
         </h1>
         <p style={{ color: "#555", marginBottom: "20px" }}>
-          A demonstration of efficient polling and cache invalidation with RTK
-          Query and ETag caching.
+          A demonstration of bounded, ETag-driven polling with RTK Query.
         </p>
 
         <TodoList />
