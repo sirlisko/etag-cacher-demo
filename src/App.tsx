@@ -88,7 +88,7 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
 // TodoList component with polling status indicator
 const TodoList: React.FC = () => {
   const { data, isFetching, isLoading } = useGetTodosQuery();
-  const todos = data?.data || [];
+  const todos = data?.todos ?? [];
 
   const [addTodo] = useAddTodoMutation();
   const [newTodoTitle, setNewTodoTitle] = useState("");
