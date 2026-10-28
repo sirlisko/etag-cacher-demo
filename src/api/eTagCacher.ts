@@ -31,7 +31,7 @@ interface ApiWithInvalidateTags<TagType extends string = string> {
  * @template TagType - The type of cache tags used by the API
  */
 export class EtagCacher<T extends ApiWithInvalidateTags<TagType>, K = undefined, TagType extends string = string> {
-  cache: Record<string, { etag: string; poll: boolean; retry: number }>;
+  cache: Record<string, { etag?: string; poll: boolean; retry: number }>;
 
   /**
    * Creates a new EtagCacher instance

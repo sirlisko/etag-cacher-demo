@@ -19,20 +19,24 @@ const store = configureStore({
     getDefaultMiddleware().concat(todosApi.middleware),
 });
 
+const STATUS_COLORS: Record<
+  Todo["status"],
+  { background: string; text: string; badge: string }
+> = {
+  processing: { background: "#f3f4f6", text: "#6b7280", badge: "#e5e7eb" },
+  pending: { background: "#fffdeb", text: "#f57c00", badge: "#fff3e0" },
+  completed: { background: "#e8f6e8", text: "#4caf50", badge: "#e8f5e9" },
+  failed: { background: "#fdecea", text: "#d32f2f", badge: "#ffebee" },
+};
+
 // TodoItem component
 const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
   const [updateStatus] = useUpdateTodoStatusMutation();
+  const colors = STATUS_COLORS[todo.status];
 
-  const handleStatusChange = async () => {
+  const handleStatusChange = () => {
     const newStatus = todo.status === "pending" ? "completed" : "pending";
-
-    try {
-      await updateStatus({ id: todo.id, status: newStatus });
-      // This will trigger polling via the EtagCacher
-      todosCacher.setPoll("global");
-    } catch (error) {
-      console.error("Failed to update todo status:", error);
-    }
+    updateStatus({ id: todo.id, status: newStatus });
   };
 
   return (
@@ -43,7 +47,7 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
         alignItems: "center",
         marginBottom: "10px",
         padding: "10px",
-        backgroundColor: todo.status === "pending" ? "#fffdeb" : "#e8f6e8",
+        backgroundColor: colors.background,
         borderRadius: "4px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
         transition: "all 0.2s ease",
@@ -53,6 +57,7 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
         type="checkbox"
         checked={todo.status === "completed"}
         onChange={handleStatusChange}
+        disabled={todo.status === "processing"}
         style={{ marginRight: "10px" }}
       />
       <span
@@ -67,11 +72,11 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
       <span
         style={{
           fontSize: "0.8rem",
-          color: todo.status === "pending" ? "#f57c00" : "#4caf50",
+          color: colors.text,
           fontWeight: "bold",
           padding: "2px 6px",
           borderRadius: "3px",
-          backgroundColor: todo.status === "pending" ? "#fff3e0" : "#e8f5e9",
+          backgroundColor: colors.badge,
         }}
       >
         {todo.status.toUpperCase()}
@@ -83,7 +88,7 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
 // TodoList component with polling status indicator
 const TodoList: React.FC = () => {
   const { data, isFetching, isLoading } = useGetTodosQuery();
-  const todos = data?.data || [];
+  const todos = data?.todos ?? [];
 
   const [addTodo] = useAddTodoMutation();
   const [newTodoTitle, setNewTodoTitle] = useState("");
@@ -108,15 +113,8 @@ const TodoList: React.FC = () => {
     e.preventDefault();
     if (!newTodoTitle.trim()) return;
 
-    try {
-      await addTodo({ title: newTodoTitle });
-      setNewTodoTitle("");
-
-      // Set polling to check for changes
-      todosCacher.setPoll("global");
-    } catch (error) {
-      console.error("Failed to add todo:", error);
-    }
+    await addTodo({ title: newTodoTitle });
+    setNewTodoTitle("");
   };
 
   if (isLoading) return <div>Loading todos...</div>;
@@ -212,18 +210,21 @@ const TodoList: React.FC = () => {
       >
         <h3 style={{ marginTop: 0, color: "#0d47a1" }}>About EtagCacher</h3>
         <p>
-          This demo showcases efficient data polling with ETag caching. When you
-          add or update todos:
+          This demo shows bounded polling driven by ETags. When you add or
+          update todos:
         </p>
         <ul style={{ paddingLeft: "20px", lineHeight: "1.5" }}>
-          <li>The EtagCacher tracks server-side changes via ETags</li>
-          <li>Polling automatically starts when you make changes</li>
+          <li>Polling starts after each change</li>
           <li>
-            Polling stops when all todos are completed or a new ETag is received
+            Each refetch compares the response ETag with the last one seen
           </li>
           <li>
-            <strong>Note:</strong> There's a 2-second delay when adding a todo
-            before the server updates the ETag after changes
+            Polling stops once the ETag has changed and no todo is processing,
+            or after 5 retries
+          </li>
+          <li>
+            <strong>Note:</strong> new todos are processed on the server for 2
+            seconds before their data and ETag change
           </li>
         </ul>
         <p style={{ marginBottom: 0 }}>
@@ -252,8 +253,7 @@ function App() {
           EtagCacher Demo
         </h1>
         <p style={{ color: "#555", marginBottom: "20px" }}>
-          A demonstration of efficient polling and cache invalidation with RTK
-          Query and ETag caching.
+          A demonstration of bounded, ETag-driven polling with RTK Query.
         </p>
 
         <TodoList />

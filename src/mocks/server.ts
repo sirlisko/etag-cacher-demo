@@ -26,9 +26,9 @@ export const handlers = [
     );
   }),
 
-  rest.put('/api/todos/:id', (req, res, ctx) => {
+  rest.put('/api/todos/:id', async (req, res, ctx) => {
     const { id } = req.params;
-    const { status } = req.body as { status: string };
+    const { status } = await req.json();
 
     todos = todos.map(todo =>
       todo.id === id ? { ...todo, status } : todo
@@ -52,13 +52,16 @@ export const handlers = [
     const newTodo = {
       id: `${todos.length + 1}`,
       title: body.title,
-      status: 'pending'
+      status: 'processing'
     };
 
     todos = [...todos, newTodo];
 
-    // Generate new ETag after 2 seconds to simulate server processing
+    // Finish background processing after 2 seconds; data and ETag change together
     setTimeout(() => {
+      todos = todos.map(todo =>
+        todo.id === newTodo.id ? { ...todo, status: 'pending' } : todo
+      );
       generateNewEtag();
     }, 2000);
 

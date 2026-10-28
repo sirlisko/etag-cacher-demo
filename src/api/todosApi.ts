@@ -4,31 +4,24 @@ import { EtagCacher } from './eTagCacher';
 export interface Todo {
   id: string;
   title: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: 'processing' | 'pending' | 'completed' | 'failed';
 }
 
 export const todosApi = createApi({
   reducerPath: 'todosApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/',
-    responseHandler: async (response) => {
-      const data = await response.json();
-      return {
-        data,
-        meta: {
-          etag: response.headers.get('ETag') || ''
-        }
-      };
-    }
-  }),
+  baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
   tagTypes: ['Todos'],
   endpoints: (builder) => ({
-    getTodos: builder.query<{data: Todo[], meta: {etag: string}}, void>({
+    getTodos: builder.query<{ todos: Todo[]; etag: string }, void>({
       query: () => 'todos',
+      transformResponse: (todos: Todo[], meta) => ({
+        todos,
+        etag: meta?.response?.headers.get('ETag') ?? '',
+      }),
       async onQueryStarted(_, { queryFulfilled, dispatch }) {
         try {
           const result = await queryFulfilled;
-          todosCacher.checkEtag(dispatch, "global", result.data.meta.etag);
+          todosCacher.checkEtag(dispatch, "global", result.data.etag, result.data.todos);
         } catch (e) {
           console.error(e);
         }
@@ -72,11 +65,9 @@ export const todosApi = createApi({
   }),
 });
 
-// Initialize the EtagCacher with proper types
-export const todosCacher = new EtagCacher<typeof todosApi, Todo, 'Todos'>(
-  'Todos',
-  todosApi
-);
+export const todosCacher = new EtagCacher('Todos', todosApi, {
+  isStatusPending: (todo: Todo) => todo.status === 'processing',
+});
 
 export const {
   useGetTodosQuery,
