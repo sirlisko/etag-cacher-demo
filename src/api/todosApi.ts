@@ -42,11 +42,12 @@ export const todosApi = createApi({
         body: { status },
       }),
       async onQueryStarted(_, { queryFulfilled }) {
+        // Set before the tag-invalidation refetch can resolve, or its checkEtag would miss it
+        todosCacher.setPoll('global');
         try {
           await queryFulfilled;
-          todosCacher.setPoll('global');
-
         } catch (e) {
+          todosCacher.stopPolling('global');
           console.error(e);
         }
       },
@@ -59,11 +60,12 @@ export const todosApi = createApi({
         body: newTodo,
       }),
       async onQueryStarted(_, { queryFulfilled }) {
+        // Set before the tag-invalidation refetch can resolve, or its checkEtag would miss it
+        todosCacher.setPoll('global');
         try {
           await queryFulfilled;
-          todosCacher.setPoll('global');
-
         } catch (e) {
+          todosCacher.stopPolling('global');
           console.error(e);
         }
       },
