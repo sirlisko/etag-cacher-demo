@@ -19,9 +19,20 @@ const store = configureStore({
     getDefaultMiddleware().concat(todosApi.middleware),
 });
 
+const STATUS_COLORS: Record<
+  Todo["status"],
+  { background: string; text: string; badge: string }
+> = {
+  processing: { background: "#f3f4f6", text: "#6b7280", badge: "#e5e7eb" },
+  pending: { background: "#fffdeb", text: "#f57c00", badge: "#fff3e0" },
+  completed: { background: "#e8f6e8", text: "#4caf50", badge: "#e8f5e9" },
+  failed: { background: "#fdecea", text: "#d32f2f", badge: "#ffebee" },
+};
+
 // TodoItem component
 const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
   const [updateStatus] = useUpdateTodoStatusMutation();
+  const colors = STATUS_COLORS[todo.status];
 
   const handleStatusChange = () => {
     const newStatus = todo.status === "pending" ? "completed" : "pending";
@@ -36,7 +47,7 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
         alignItems: "center",
         marginBottom: "10px",
         padding: "10px",
-        backgroundColor: todo.status === "pending" ? "#fffdeb" : "#e8f6e8",
+        backgroundColor: colors.background,
         borderRadius: "4px",
         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
         transition: "all 0.2s ease",
@@ -46,6 +57,7 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
         type="checkbox"
         checked={todo.status === "completed"}
         onChange={handleStatusChange}
+        disabled={todo.status === "processing"}
         style={{ marginRight: "10px" }}
       />
       <span
@@ -60,11 +72,11 @@ const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
       <span
         style={{
           fontSize: "0.8rem",
-          color: todo.status === "pending" ? "#f57c00" : "#4caf50",
+          color: colors.text,
           fontWeight: "bold",
           padding: "2px 6px",
           borderRadius: "3px",
-          backgroundColor: todo.status === "pending" ? "#fff3e0" : "#e8f5e9",
+          backgroundColor: colors.badge,
         }}
       >
         {todo.status.toUpperCase()}

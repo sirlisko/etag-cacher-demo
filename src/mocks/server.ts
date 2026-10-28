@@ -52,13 +52,16 @@ export const handlers = [
     const newTodo = {
       id: `${todos.length + 1}`,
       title: body.title,
-      status: 'pending'
+      status: 'processing'
     };
 
     todos = [...todos, newTodo];
 
-    // Generate new ETag after 2 seconds to simulate server processing
+    // Finish background processing after 2 seconds; data and ETag change together
     setTimeout(() => {
+      todos = todos.map(todo =>
+        todo.id === newTodo.id ? { ...todo, status: 'pending' } : todo
+      );
       generateNewEtag();
     }, 2000);
 

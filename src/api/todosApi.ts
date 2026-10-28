@@ -4,7 +4,7 @@ import { EtagCacher } from './eTagCacher';
 export interface Todo {
   id: string;
   title: string;
-  status: 'pending' | 'completed' | 'failed';
+  status: 'processing' | 'pending' | 'completed' | 'failed';
 }
 
 export const todosApi = createApi({
