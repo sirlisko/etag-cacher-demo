@@ -23,16 +23,9 @@ const store = configureStore({
 const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
   const [updateStatus] = useUpdateTodoStatusMutation();
 
-  const handleStatusChange = async () => {
+  const handleStatusChange = () => {
     const newStatus = todo.status === "pending" ? "completed" : "pending";
-
-    try {
-      await updateStatus({ id: todo.id, status: newStatus });
-      // This will trigger polling via the EtagCacher
-      todosCacher.setPoll("global");
-    } catch (error) {
-      console.error("Failed to update todo status:", error);
-    }
+    updateStatus({ id: todo.id, status: newStatus });
   };
 
   return (
@@ -108,15 +101,8 @@ const TodoList: React.FC = () => {
     e.preventDefault();
     if (!newTodoTitle.trim()) return;
 
-    try {
-      await addTodo({ title: newTodoTitle });
-      setNewTodoTitle("");
-
-      // Set polling to check for changes
-      todosCacher.setPoll("global");
-    } catch (error) {
-      console.error("Failed to add todo:", error);
-    }
+    await addTodo({ title: newTodoTitle });
+    setNewTodoTitle("");
   };
 
   if (isLoading) return <div>Loading todos...</div>;
