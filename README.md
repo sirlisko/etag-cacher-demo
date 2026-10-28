@@ -2,6 +2,8 @@
 
 A demonstration of bounded, ETag-driven polling with RTK Query.
 
+**Live demo:** https://sirlisko.github.io/etag-cacher-demo/
+
 ## Overview
 
 Some backends acknowledge a write before they have finished processing it. Instead of polling on a fixed interval forever, the EtagCacher polls only after a mutation and stops as soon as the server reports a change.
