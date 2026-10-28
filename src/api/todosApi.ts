@@ -72,12 +72,9 @@ export const todosApi = createApi({
   }),
 });
 
-// Initialize the EtagCacher with proper types
-export const todosCacher = new EtagCacher<typeof todosApi, Todo, 'Todos'>(
-  'Todos',
-  todosApi,
-  { isStatusPending: (todo) => todo.status === 'processing' }
-);
+export const todosCacher = new EtagCacher('Todos', todosApi, {
+  isStatusPending: (todo: Todo) => todo.status === 'processing',
+});
 
 export const {
   useGetTodosQuery,
